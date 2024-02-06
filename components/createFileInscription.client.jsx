@@ -1,15 +1,13 @@
-import { useState } from "react";
-import type { Capability } from "sats-connect";
+'use client'
+// Ensure you have the necessary imports for React and other dependencies
+
+import React, { useState } from "react";
+import { Capability } from "sats-connect";
 import { BitcoinNetworkType, createInscription } from "sats-connect";
 
-type Props = {
-  network: BitcoinNetworkType;
-  capabilities: Set<Capability>;
-};
-
-const CreateBinaryInscription = ({ network, capabilities }: Props) => {
-  const [content, setContent] = useState<string>("");
-  const [contentType, setContentType] = useState<string>("image/jpeg");
+const CreateBinaryInscription = ({ network, capabilities }) => {
+  const [content, setContent] = useState("");
+  const [contentType, setContentType] = useState("image/jpeg");
 
   const onCreateClick = async () => {
     try {
@@ -36,7 +34,7 @@ const CreateBinaryInscription = ({ network, capabilities }: Props) => {
     }
   };
 
-  const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileSelect = (e) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) {
       setContent("");
@@ -44,7 +42,7 @@ const CreateBinaryInscription = ({ network, capabilities }: Props) => {
     }
     const reader = new FileReader();
     reader.onload = (e) => {
-      const contentString = e.target?.result as string;
+      const contentString = e.target?.result;
       if (!contentString) {
         return;
       }

@@ -1,20 +1,15 @@
-import { useState } from "react";
-import type { Capability, CreateRepeatInscriptionsResponse } from "sats-connect";
-import { BitcoinNetworkType, createRepeatInscriptions } from "sats-connect";
+'use client';
+import React, { useState } from 'react';
+import { BitcoinNetworkType, createRepeatInscriptions } from 'sats-connect';
 
-type Props = {
-  network: BitcoinNetworkType;
-  capabilities: Set<Capability>;
-};
+const CreateRepeatInscriptions = ({ network, capabilities }) => {
+  const [suggestedMinerFeeRate, setSuggestedMinerFeeRate] = useState(8);
 
-const CreateRepeatInscriptions = ({ network, capabilities }: Props) => {
-  const [suggestedMinerFeeRate, setSuggestedMinerFeeRate] = useState<number>(8);
-
-  const [content, setContent] = useState<string>(
+  const [content, setContent] = useState(
     '{"p":"brc-20","op":"mint","tick":"doge","amt":"4200"}'
   );
-  const [contentType, setContentType] = useState<string>("application/json");
-  const [repeat, setRepeat] = useState<string>("12");
+  const [contentType, setContentType] = useState('application/json');
+  const [repeat, setRepeat] = useState('12');
   const onCreateClick = async () => {
     try {
       await createRepeatInscriptions({
@@ -25,24 +20,20 @@ const CreateRepeatInscriptions = ({ network, capabilities }: Props) => {
           repeat: Number(repeat),
           contentType,
           content,
-          payloadType: "PLAIN_TEXT",
-          /** Optional parameters:
-          appFeeAddress: "", // the address where the inscription fee should go
-          appFee: 1000, // the amount of sats that should be sent to the fee address
-          */
+          payloadType: 'PLAIN_TEXT',
           suggestedMinerFeeRate,
         },
-        onFinish: (response: CreateRepeatInscriptionsResponse) => {
+        onFinish: (response) => {
           alert(response.txId);
         },
-        onCancel: () => alert("Canceled"),
+        onCancel: () => alert('Canceled'),
       });
     } catch (error) {
       alert(`An error ocurred: ${error.message}`);
     }
   };
 
-  if (!capabilities.has("createRepeatInscriptions")) {
+  if (!capabilities.has('createRepeatInscriptions')) {
     return (
       <div className="container">
         <h3>Create repeat inscriptions</h3>

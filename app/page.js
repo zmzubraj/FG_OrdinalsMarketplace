@@ -1,4 +1,6 @@
-import type { Capability } from "sats-connect";
+'use client';
+
+import { Capability } from "sats-connect";
 import {
   AddressPurpose,
   BitcoinNetworkType,
@@ -6,34 +8,31 @@ import {
   getCapabilities,
 } from "sats-connect";
 
-import CreateFileInscription from "./components/createFileInscription";
-import CreateTextInscription from "./components/createTextInscription";
-import SendBitcoin from "./components/sendBitcoin";
-import SignMessage from "./components/signMessage";
-import SignTransaction from "./components/signTransaction";
+import CreateFileInscription from "../components/createFileInscription.client";
+import CreateTextInscription from "../components/createTextInscription.client";
+import SendBitcoin from "../components/sendBitcoin.client.jsx";
+import SignMessage from "../components/signMessage";
+import SignTransaction from "../components/signTransaction";
 import { useLocalStorage } from "./useLocalStorage";
 
 import { useEffect, useState } from "react";
-import "./App.css";
-import CreateRepeatInscriptions from "./components/createRepeatInscriptions";
-import SignBulkTransaction from "./components/signBulkTransaction";
 
-function App() {
+import CreateRepeatInscriptions from "../components/createRepeatInscriptions.client";
+import SignBulkTransaction from "../components/signBulkTransaction";
+
+export default function Home() {
   const [paymentAddress, setPaymentAddress] = useLocalStorage("paymentAddress");
-  const [paymentPublicKey, setPaymentPublicKey] =
-    useLocalStorage("paymentPublicKey");
-  const [ordinalsAddress, setOrdinalsAddress] =
-    useLocalStorage("ordinalsAddress");
-  const [ordinalsPublicKey, setOrdinalsPublicKey] =
-    useLocalStorage("ordinalsPublicKey");
-  const [network, setNetwork] = useLocalStorage<BitcoinNetworkType>(
+  const [paymentPublicKey, setPaymentPublicKey] = useLocalStorage("paymentPublicKey");
+  const [ordinalsAddress, setOrdinalsAddress] = useLocalStorage("ordinalsAddress");
+  const [ordinalsPublicKey, setOrdinalsPublicKey] = useLocalStorage("ordinalsPublicKey");
+  const [network, setNetwork] = useLocalStorage(
     "network",
     BitcoinNetworkType.Testnet
   );
-  const [capabilityState, setCapabilityState] = useState<
-    "loading" | "loaded" | "missing" | "cancelled"
-  >("loading");
-  const [capabilities, setCapabilities] = useState<Set<Capability>>();
+  
+  const [capabilityState, setCapabilityState] = useState("loading");
+
+  const [capabilities, setCapabilities] = useState(null);
 
   useEffect(() => {
     const runCapabilityCheck = async () => {
@@ -41,7 +40,6 @@ function App() {
       const MAX_RUNS = 20;
       setCapabilityState("loading");
 
-      // the wallet's in-page script may not be loaded yet, so we'll try a few times
       while (runs < MAX_RUNS) {
         try {
           await getCapabilities({
@@ -158,7 +156,6 @@ function App() {
       </div>
     );
   }
-
   return (
     <div style={{ padding: 30 }}>
       <h1>Sats Connect Test App - {network}</h1>
@@ -171,15 +168,16 @@ function App() {
           <h3>Disconnect wallet</h3>
           <button onClick={onWalletDisconnect}>Disconnect</button>
         </div>
-
+        <br />
         <SignTransaction
           paymentAddress={paymentAddress}
           paymentPublicKey={paymentPublicKey}
           ordinalsAddress={ordinalsAddress}
           ordinalsPublicKey={ordinalsPublicKey}
           network={network}
-          capabilities={capabilities!}
+          capabilities={capabilities}
         />
+        <br />
 
         <SignBulkTransaction
           paymentAddress={paymentAddress}
@@ -187,29 +185,28 @@ function App() {
           ordinalsAddress={ordinalsAddress}
           ordinalsPublicKey={ordinalsPublicKey}
           network={network}
-          capabilities={capabilities!}
+          capabilities={capabilities}
         />
-
+        <br />
         <SignMessage
           address={ordinalsAddress}
           network={network}
-          capabilities={capabilities!}
+          capabilities={capabilities}
         />
-
+        <br />
         <SendBitcoin
           address={paymentAddress}
           network={network}
-          capabilities={capabilities!}
+          capabilities={capabilities}
         />
-
-        <CreateTextInscription network={network} capabilities={capabilities!} />
-
-        <CreateRepeatInscriptions network={network} capabilities={capabilities!} />
-
-        <CreateFileInscription network={network} capabilities={capabilities!} />
+        <br />
+        <CreateTextInscription network={network} capabilities={capabilities} />
+        <br />
+        <CreateRepeatInscriptions network={network} capabilities={capabilities} />
+        <br />
+        <CreateFileInscription network={network} capabilities={capabilities} />
+        <br />
       </div>
     </div>
   );
 }
-
-export default App;

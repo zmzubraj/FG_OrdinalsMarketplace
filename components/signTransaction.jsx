@@ -1,18 +1,7 @@
-import type { Capability } from "sats-connect";
+import { Capability } from "sats-connect";
 import { BitcoinNetworkType, signTransaction } from "sats-connect";
-
 import * as btc from "@scure/btc-signer";
-
-import { createPSBT, getUTXOs } from "../utils";
-
-type Props = {
-  network: BitcoinNetworkType;
-  ordinalsAddress: string;
-  paymentAddress: string;
-  paymentPublicKey: string;
-  ordinalsPublicKey: string;
-  capabilities: Set<Capability>;
-};
+import { createPSBT, getUTXOs } from "../app/utils";
 
 const SignTransaction = ({
   network,
@@ -21,7 +10,7 @@ const SignTransaction = ({
   paymentPublicKey,
   ordinalsPublicKey,
   capabilities,
-}: Props) => {
+}) => {
   const onSignTransactionClick = async () => {
     const [paymentUnspentOutputs, ordinalsUnspentOutputs] = await Promise.all([
       getUTXOs(network, paymentAddress),

@@ -1,72 +1,38 @@
-import { base64, hex } from "@scure/base";
-import * as btc from "@scure/btc-signer";
+const { base64, hex } = require("@scure/base");
+const btc = require("@scure/btc-signer");
+const { BitcoinNetworkType } = require("sats-connect");
 
-import { BitcoinNetworkType } from "sats-connect";
-
-export type UTXO = {
-  txid: string;
-  vout: number;
-  status: {
-    confirmed: boolean;
-    block_height?: number;
-    block_hash?: string;
-    block_time?: number;
-  };
-  value: number;
-};
-
-export const getUTXOs = async (
-  network: BitcoinNetworkType,
-  address: string
-): Promise<UTXO[]> => {
-  const networkSubpath =
-    network === BitcoinNetworkType.Testnet ? "/testnet" : "";
-
+const getUTXOs = async (network, address) => {
+  const networkSubpath = network === BitcoinNetworkType.Testnet ? "/testnet" : "";
   const url = `https://mempool.space${networkSubpath}/api/address/${address}/utxo`;
   const response = await fetch(url);
-
   return response.json();
 };
 
-export const createPSBT = async (
-  networkType: BitcoinNetworkType,
-  paymentPublicKeyString: string,
-  ordinalsPublicKeyString: string,
-  paymentUnspentOutputs: UTXO[],
-  ordinalsUnspentOutputs: UTXO[],
-  recipient1: string,
-  recipient2: string
+const createPSBT = async (
+  networkType,
+  paymentPublicKeyString,
+  ordinalsPublicKeyString,
+  paymentUnspentOutputs,
+  ordinalsUnspentOutputs,
+  recipient1,
+  recipient2
 ) => {
-  const network =
-    networkType === BitcoinNetworkType.Testnet ? btc.TEST_NETWORK : btc.NETWORK;
-
-  // choose first unspent output
+  const network = networkType === BitcoinNetworkType.Testnet ? btc.TEST_NETWORK : btc.NETWORK;
   const paymentOutput = paymentUnspentOutputs[0];
   const ordinalOutput = ordinalsUnspentOutputs[0];
-
   const paymentPublicKey = hex.decode(paymentPublicKeyString);
   const ordinalPublicKey = hex.decode(ordinalsPublicKeyString);
-
-  const tx = new btc.Transaction({
-    allowUnknownOutputs: true,
-  });
-
-  // create segwit spend
+  const tx = new btc.Transaction({ allowUnknownOutputs: true });
   const p2wpkh = btc.p2wpkh(paymentPublicKey, network);
   const p2sh = btc.p2sh(p2wpkh, network);
-
-  // create taproot spend
   const p2tr = btc.p2tr(ordinalPublicKey, undefined, network);
-
-  // set transfer amount and calculate change
-  const fee = 300n; // set the miner fee amount
+  const fee = 300n; 
   const recipient1Amount = BigInt(Math.min(paymentOutput.value, 3000)) - fee;
   const recipient2Amount = BigInt(Math.min(ordinalOutput.value, 3000));
   const total = recipient1Amount + recipient2Amount;
-  const changeAmount =
-    BigInt(paymentOutput.value) + BigInt(ordinalOutput.value) - total - fee;
+  const changeAmount = BigInt(paymentOutput.value) + BigInt(ordinalOutput.value) - total - fee;
 
-  // payment input
   tx.addInput({
     txid: paymentOutput.txid,
     index: paymentOutput.vout,
@@ -79,7 +45,6 @@ export const createPSBT = async (
     sighashType: btc.SignatureHash.SINGLE | btc.SignatureHash.ANYONECANPAY,
   });
 
-  // ordinals input
   tx.addInput({
     txid: ordinalOutput.txid,
     index: ordinalOutput.vout,
@@ -108,3 +73,5 @@ export const createPSBT = async (
   const psbtB64 = base64.encode(psbt);
   return psbtB64;
 };
+
+module.exports = { getUTXOs, createPSBT };

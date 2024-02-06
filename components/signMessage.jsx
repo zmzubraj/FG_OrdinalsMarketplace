@@ -1,14 +1,8 @@
-import { useState } from "react";
-import type { Capability } from "sats-connect";
+'use client';
+import React, { useState } from "react";
 import { BitcoinNetworkType, signMessage } from "sats-connect";
 
-type Props = {
-  network: BitcoinNetworkType;
-  address: string;
-  capabilities: Set<Capability>;
-};
-
-const SignMessage = ({ network, address, capabilities }: Props) => {
+const SignMessage = ({ network, address, capabilities }) => {
   const [message, setMessage] = useState("Hello World!");
 
   const onSignMessageClick = async () => {

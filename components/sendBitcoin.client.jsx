@@ -1,16 +1,10 @@
+'use client';
 import { useState } from "react";
-import type { Capability } from "sats-connect";
-import { BitcoinNetworkType, sendBtcTransaction } from "sats-connect";
+import { sendBtcTransaction } from "sats-connect";
 
-type Props = {
-  network: BitcoinNetworkType;
-  address: string;
-  capabilities: Set<Capability>;
-};
-
-const SendBitcoin = ({ network, address, capabilities }: Props) => {
+const SendBitcoin = ({ network, address, capabilities }) => {
   const [recipient, setRecipient] = useState("");
-  const [amount, setAmount] = useState(0n);
+  const [amount, setAmount] = useState(BigInt(0));
 
   const onSendBtcClick = async () => {
     await sendBtcTransaction({
@@ -25,7 +19,7 @@ const SendBitcoin = ({ network, address, capabilities }: Props) => {
           },
           // you can add more recipients here
         ],
-        senderAddress: address!,
+        senderAddress: address,
       },
       onFinish: (response) => {
         alert(response);
@@ -34,13 +28,14 @@ const SendBitcoin = ({ network, address, capabilities }: Props) => {
     });
   };
 
-  if (network !== BitcoinNetworkType.Testnet)
+  if (network !== "Testnet") {
     return (
       <div className="container">
         <h3>Send Bitcoin</h3>
         <div>Only available on testnet</div>
       </div>
     );
+  }
 
   if (!capabilities.has("sendBtcTransaction")) {
     return (
